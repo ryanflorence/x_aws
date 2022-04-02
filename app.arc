@@ -2,6 +2,9 @@
 remix-website-8e12
 
 @http
+/seed
+  method get
+  src server
 /*
   method any
   src server
