@@ -45,6 +45,7 @@ export async function addGitHubRefToDB(ref: string): Promise<void> {
   await processFiles(async ({ filename, content }) => {
     // # TODO make a function for this
     let id = `${ref}#${filename}`;
+    console.log(`Processing markdown: ${filename}`);
     let html = await processMarkdown(content);
     let name = id; // TODO: use frontmatter
     let doc: Doc = {
@@ -57,7 +58,14 @@ export async function addGitHubRefToDB(ref: string): Promise<void> {
       ref,
     };
 
-    let result = await db.doc.put(doc);
-    console.log(`Added: ${result.id}`);
+    try {
+      console.log(`Writing to dynamo: ${filename}`);
+      let result = await db.doc.put(doc);
+      console.log(`✅ processed ${result.id}`);
+    } catch (e) {
+      console.error(`🚫 failed ${filename}`);
+      console.error(e);
+      throw e;
+    }
   });
 }

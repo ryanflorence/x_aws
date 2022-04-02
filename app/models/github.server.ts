@@ -22,10 +22,11 @@ async function getGitHubTarballStream(ref: string) {
   let res = (await get(options)) as any;
 
   if (res.statusCode === 200) {
+    console.debug(`Fetch succeeded: ${tarballURL}`);
     return res;
   }
 
-  throw new Error(`Could not fetch ${ref}`);
+  throw new Error(`Could not fetch ${tarballURL}`);
 }
 
 function get(options: any) {

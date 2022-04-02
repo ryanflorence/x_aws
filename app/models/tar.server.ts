@@ -36,7 +36,6 @@ async function processFilesFromRepoTarball(
           // buffer the contents of this file stream so we can send the entire
           // string to be processed by the caller
           let content = await bufferStream(stream);
-          console.log(filename);
           await processFile({ filename, content });
           next();
         } else {
