@@ -18,3 +18,15 @@ password
 note
   pk *String  # userId
   sk **String # noteId
+
+doc
+  id *String
+  name String
+  markdown String
+  ref String
+  lang String
+  html String
+  parentId String
+
+ghRef
+  ref *String
