@@ -53,6 +53,14 @@ export async function getDocRef(ref: string): Promise<DocRef> {
 
 export async function addGitHubRefToDB(ref: string): Promise<void> {
   let db = await arc.tables();
+
+  let docRef = await db.docRef.get({ pk: ref });
+
+  // already seeding
+  if (docRef && docRef.status === "seeding") {
+    return;
+  }
+
   db.docRef.put({ pk: ref, status: "seeding" });
   let stream = await getRepoTarballStream(ref);
   let processFiles = createTarFileProcessor(stream);

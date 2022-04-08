@@ -68,7 +68,10 @@ function Seeding() {
 
   React.useEffect(() => {
     if (fetcher.state !== "loading") {
-      fetcher.load(`/status/${params.lang}/${params.ref}`);
+      let id = setTimeout(() => {
+        fetcher.load(`/status/${params.lang}/${params.ref}`);
+      }, 200);
+      return () => clearTimeout(id);
     }
   }, [fetcher, params.lang, params.ref]);
 
