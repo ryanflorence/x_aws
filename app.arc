@@ -6,11 +6,8 @@ remix-website-8e12
   method any
   src server
 
-# @events
-# seed
-#   src events/seed
-
 @static
+fingerprint external
 
 @tables
 user
