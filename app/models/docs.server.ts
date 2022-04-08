@@ -39,7 +39,10 @@ export async function getMenu(ref: string, lang: string): Promise<MenuDoc[]> {
   })).sort(sortBy("slug"));
 }
 
-export async function getDoc(ref: string, slug: string): Promise<MenuDoc[]> {
+export async function getDoc(
+  ref: string,
+  slug: string
+): Promise<Doc | undefined> {
   let db = await arc.tables();
   let sk = makeDocId(ref, `docs/${slug}.md`);
   let pk = ref;
