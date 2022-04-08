@@ -5,67 +5,84 @@ import { processMarkdown } from "@ryanflorence/md";
 // @ts-expect-error
 import sortBy from "sort-by";
 
-interface Doc {
-  id: string;
+export interface Doc {
+  pk: string;
   name: string;
   markdown: string;
   ref: string;
   lang: string;
   html?: string;
-  parentId?: string;
+  parentPk?: string;
 }
 
-type MenuDoc = Pick<Doc, "name" | "id"> & { slug: string };
+export interface DocRef {
+  pk: string;
+  status: "seeding" | "failed" | "complete";
+  lastDoc?: string;
+}
+
+type MenuDoc = Pick<Doc, "pk" | "name"> & { slug: string };
 
 export async function getMenu(ref: string, lang: string): Promise<MenuDoc[]> {
   let db = await arc.tables();
   let result = await db.doc.scan({});
   return result.Items.map((item: any) => ({
-    id: item.id,
+    pk: item.pk,
     name: item.name,
     // just want the "slug" part of this: {ref}#docs/{slug}.md
     // should use `match`, I'm too tired.
-    slug: item.id.match(/docs\/(.+)\.md/)[1],
+    slug: item.pk.match(/docs\/(.+)\.md/)[1],
   })).sort(sortBy("slug"));
 }
 
 export async function getDoc(ref: string, slug: string): Promise<MenuDoc[]> {
   let db = await arc.tables();
-  let filename = `docs/${slug}.md`;
-  let id = `${ref}#${filename}`;
-  let result = await db.doc.get({ id });
+  let pk = generateDocPrimaryKey(ref, `docs/${slug}.md`);
+  let result = await db.doc.get({ pk });
   if (!result) throw new Response("", { status: 404 });
   return result;
 }
 
+let generateDocPrimaryKey = (ref: string, filename: string) =>
+  `${ref}#${filename}`;
+
+export async function getDocRef(ref: string): Promise<DocRef> {
+  let db = await arc.tables();
+  return db.docRef.get({ pk: ref });
+}
+
 export async function addGitHubRefToDB(ref: string): Promise<void> {
   let db = await arc.tables();
+  db.docRef.put({ pk: ref, status: "seeding" });
   let stream = await getRepoTarballStream(ref);
   let processFiles = createTarFileProcessor(stream);
   await processFiles(async ({ filename, content }) => {
     // # TODO make a function for this
-    let id = `${ref}#${filename}`;
-    console.log(`Processing markdown: ${filename}`);
+    let pk = generateDocPrimaryKey(ref, filename);
+    console.log(`Processing markdown: ${pk}`);
     let html = await processMarkdown(content);
-    let name = id; // TODO: use frontmatter
+    let name = pk; // TODO: use frontmatter
     let doc: Doc = {
-      id,
+      pk,
       lang: "en",
       markdown: content,
       name,
       html: html,
-      parentId: "",
+      parentPk: "",
       ref,
     };
 
     try {
       console.log(`Writing to dynamo: ${filename}`);
       let result = await db.doc.put(doc);
-      console.log(`✅ processed ${result.id}`);
+      console.log(`✅ processed ${result.pk}`);
+      db.docRef.put({ pk: ref, status: "seeding", lastDoc: filename });
     } catch (e) {
       console.error(`🚫 failed ${filename}`);
       console.error(e);
+      db.docRef.put({ pk: ref, status: "failed" });
       throw e;
     }
   });
+  db.docRef.put({ pk: ref, status: "complete" });
 }

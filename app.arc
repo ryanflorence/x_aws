@@ -2,12 +2,13 @@
 remix-website-8e12
 
 @http
-/seed
-  method get
-  src server
 /*
   method any
   src server
+
+# @events
+# seed
+#   src events/seed
 
 @static
 
@@ -23,7 +24,7 @@ note
   sk **String # noteId
 
 doc
-  id *String
+  pk *String
   name String
   markdown String
   ref String
@@ -31,5 +32,7 @@ doc
   html String
   parentId String
 
-ghRef
-  ref *String
+docRef
+  pk *String
+  status String
+  

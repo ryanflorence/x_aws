@@ -1,6 +1,6 @@
 import { addGitHubRefToDB } from "~/models/docs.server";
 
 export async function loader() {
-  await addGitHubRefToDB("main");
+  await addGitHubRefToDB("v6.3.0");
   return { ok: true };
 }
