@@ -65,15 +65,18 @@ export default function Doc() {
 function Seeding() {
   let fetcher = useFetcher();
   let params = useParams();
+  let location = useLocation();
 
   React.useEffect(() => {
     if (fetcher.state !== "loading") {
       let id = setTimeout(() => {
-        fetcher.load(`/status/${params.lang}/${params.ref}`);
+        fetcher.load(
+          `/status/${params.lang}/${params.ref}?r=${location.pathname}`
+        );
       }, 200);
       return () => clearTimeout(id);
     }
-  }, [fetcher, params.lang, params.ref]);
+  }, [fetcher, params, location]);
 
   return (
     <div className="flex h-full w-full items-center justify-center">

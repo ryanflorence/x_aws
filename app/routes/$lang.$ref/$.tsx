@@ -1,11 +1,13 @@
-import { LoaderFunction, useLoaderData } from "remix";
+import { json, LoaderFunction, useLoaderData } from "remix";
 import invariant from "tiny-invariant";
 import { getDoc } from "~/models/docs.server";
 
 export let loader: LoaderFunction = async ({ params }) => {
   invariant(params.ref, "expected `ref` params");
   invariant(params["*"], "expected splat param");
-  return getDoc(params.ref, params["*"]);
+  let doc = await getDoc(params.ref, params["*"]);
+  // FIXME: handle not found, need to know if it's seeding or not though
+  return json(doc || null);
 };
 
 export default function Doc() {

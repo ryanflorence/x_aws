@@ -24,13 +24,8 @@ note
   sk **String # noteId
 
 doc
-  pk *String
-  name String
-  markdown String
-  ref String
-  lang String
-  html String
-  parentId String
+  pk *String # ghRef
+  sk **String # docId
 
 docRef
   pk *String
